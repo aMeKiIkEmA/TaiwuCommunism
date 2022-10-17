@@ -94,17 +94,17 @@ namespace TaiwuCommunism
                 {
                     continue;
                 }
-                AdaptableLog.Info(String.Format("村民{0}{1}上缴资源", villager.GetSurname(), villager.GetGivenName()));
+                // AdaptableLog.Info(String.Format("村民{0}{1}上缴资源", villager.GetSurname(), villager.GetGivenName()));
                 actualVillagerCount++;
                 for (sbyte i = 0; i < resourceTypesCount; i++)
                 {
                     int resource = villager.GetResource(i);
-                    AdaptableLog.Info(String.Format("村民{0}{1}拥有{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), resource.ToString(), i.ToString()));
+                    // AdaptableLog.Info(String.Format("村民{0}{1}拥有{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), resource.ToString(), i.ToString()));
                     if ( resource < villagerResourceLowerBound[i] ) { continue; }
                     int surplus = resource - villagerResourceLowerBound[i];
                     villager.ChangeResource(context, i, -surplus);
                     distributor.ChangeResource(context, i, surplus);
-                    AdaptableLog.Info(String.Format("村民{0}上缴了{1}{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), surplus.ToString(), i.ToString()));
+                    // AdaptableLog.Info(String.Format("村民{0}上缴了{1}{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), surplus.ToString(), i.ToString()));
                 }
             }
 
@@ -143,7 +143,7 @@ namespace TaiwuCommunism
             }
         }
 
-        private static void SellTaiwuOverflownResource(DataContext context)
+        public static void SellTaiwuOverflownResource(DataContext context)
         {
             AdaptableLog.Info("开始溢出资源处理");
             GameData.Domains.Character.Character taiwu;
@@ -166,17 +166,18 @@ namespace TaiwuCommunism
                     int renownGained = maybeGiveAwaySurplus * exchangeRateRenown / 10;
                     totalRenownGained += renownGained;
                     taiwu.ChangeResource(context, 7, renownGained);
-                    AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}声望", maybeGiveAwaySurplus, i, renownGained));
-                } else {
+                    // AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}声望", maybeGiveAwaySurplus, i, renownGained));
+                }
+                else {
                     int cashGained = maybeGiveAwaySurplus * exchangeRateCash / 10;
                     totalCashEarned += cashGained;
                     taiwu.ChangeResource(context, 6, cashGained);
-                    AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", maybeGiveAwaySurplus, i, cashGained));
+                    // AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", maybeGiveAwaySurplus, i, cashGained));
                 }
                 int cashEarned = surplus * exchangeRateCash / 10;
                 totalCashEarned += cashEarned;
                 taiwu.ChangeResource(context, 6, cashEarned);
-                AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", maybeGiveAwaySurplus, i, cashEarned));
+                // AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", surplus, i, cashEarned));
             }
             if (sellOverflowNotification) {
                 DomainManager.World.GetInstantNotificationCollection().AddResourceIncreased(DomainManager.Taiwu.GetTaiwuCharId(), 6, totalCashEarned);

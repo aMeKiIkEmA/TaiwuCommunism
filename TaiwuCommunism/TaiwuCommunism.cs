@@ -12,7 +12,7 @@ using GameData.Common;
 
 namespace TaiwuCommunism
 {
-    [PluginConfig("TaiwuCommunism", "AmekiKyou", "1.0")]
+    [PluginConfig("TaiwuCommunism", "AmekiKyou", "1.1")]
     public class TaiwuCommunism : TaiwuRemakePlugin
     {
         private Harmony harmony;
@@ -68,6 +68,9 @@ namespace TaiwuCommunism
             if (resourceRedistribution)
             {
                 Resource.Redistribute(context);
+            } else if (Resource.sellOverflownResource)
+            {
+                Resource.SellTaiwuOverflownResource(context);
             }
         }
 
