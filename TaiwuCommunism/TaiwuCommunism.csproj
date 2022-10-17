@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <BaseOutputPath>D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu\Mod\TaiwuCommunism\Plugins</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu\The Scroll of Taiwu_Data\Managed\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="GameData">
+      <HintPath>D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu\Backend\GameData.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaiwuModdingLib">
+      <HintPath>D:\SteamLibrary\steamapps\common\The Scroll Of Taiwu\The Scroll of Taiwu_Data\Managed\TaiwuModdingLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
