@@ -259,7 +259,7 @@ namespace TaiwuCommunism
                 return;
             }
             int cash = trader.GetResource(6) - (traderId == DomainManager.Taiwu.GetTaiwuCharId() ? taiwuResourceLowerBound[6] : villagerResourceLowerBound[6]);
-            if (DomainManager.Taiwu.GetWarehouseMaxLoad() * reservedWarehouseHeadroom / 100 <= DomainManager.Taiwu.GetWarehouseCurrLoad()) { return; }
+            if (DomainManager.Taiwu.GetWarehouseMaxLoad() * (100 - reservedWarehouseHeadroom) / 100 <= DomainManager.Taiwu.GetWarehouseCurrLoad()) { return; }
             if (cash <= 0) { return; }
             // AdaptableLog.Info(String.Format("持有银钱{0}", cash));
             trader.ChangeResource(context, 6, -cash);
@@ -320,7 +320,7 @@ namespace TaiwuCommunism
                             short itemSubtype = ItemTemplateHelper.GetItemSubType(key.ItemType, key.TemplateId);
                             int price = ItemTemplateHelper.GetBasePrice(key.ItemType, key.TemplateId);
                             int weight = DomainManager.Item.GetBaseItem(key).GetWeight();
-                            int headroom = DomainManager.Taiwu.GetWarehouseMaxLoad() * reservedWarehouseHeadroom / 100 - DomainManager.Taiwu.GetWarehouseCurrLoad();
+                            int headroom = DomainManager.Taiwu.GetWarehouseMaxLoad() * (100 - reservedWarehouseHeadroom) / 100 - DomainManager.Taiwu.GetWarehouseCurrLoad();
                             int maxCanBuy = count;
                             if (weight != 0)
                             {
