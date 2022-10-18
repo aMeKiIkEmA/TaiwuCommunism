@@ -178,8 +178,9 @@ namespace TaiwuCommunism
                 }
             }
             sbyte resourceTypesCount = includeCash ? (sbyte)7 : (sbyte)6;
+            int upperLimit = DomainManager.Taiwu.GetMaterialResourceMaxCount();
             int actualVillagerCount = 1;
-            
+
             foreach (int id in villagerIdsList)
             {
                 if (id == distributorId)
@@ -197,12 +198,19 @@ namespace TaiwuCommunism
                 for (sbyte i = 0; i < resourceTypesCount; i++)
                 {
                     int resource = villager.GetResource(i);
-                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}拥有{1}的资源{2}", villager.GetId(), resource.ToString(), i.ToString())); }
+                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}拥有{1}的资源{2}", villager.GetId(), resource, i)); }
+                    if (i != 6 && resource > upperLimit) {
+                        int overflown = resource - upperLimit;
+                        villager.ChangeResource(context, i, -overflown);
+                        distributor.ChangeResource(context, i, overflown);
+                        if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}上缴了{1}的溢出资源{2}", villager.GetId(), overflown, i)); }
+                        resource = upperLimit;
+                    }
                     if (resource < villagerResourceLowerBound[i]) { continue; }
                     int surplus = resource - villagerResourceLowerBound[i];
                     villager.ChangeResource(context, i, -surplus);
                     distributor.ChangeResource(context, i, surplus);
-                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}上缴了{1}的资源{2}", villager.GetId(), surplus.ToString(), i.ToString())); }
+                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}上缴了{1}的资源{2}", villager.GetId(), surplus, i)); }
                 }
             }
 
@@ -210,7 +218,6 @@ namespace TaiwuCommunism
                 PurchaseNearbyMerchantCommodity(context, distributorId);
             }
 
-            int upperLimit = DomainManager.Taiwu.GetMaterialResourceMaxCount();
             for (sbyte i = 0; i< resourceTypesCount; i++)
             {
                 int resource = distributor.GetResource(i);
@@ -218,8 +225,12 @@ namespace TaiwuCommunism
                 if (resource <= lowerBound) { continue; }
                 int surplus = resource - lowerBound;
                 int acquire = surplus / actualVillagerCount;
-                if (i != 6 && lowerBound < upperLimit) {
-                    acquire = Math.Min(acquire, upperLimit - lowerBound);
+                if (i != 6 && villagerResourceLowerBound[i] > upperLimit) {
+                    continue;
+                }
+                // Don't create new overflow.
+                if (i != 6) {
+                    acquire = Math.Min(acquire, upperLimit - villagerResourceLowerBound[i]);
                 }
                 foreach (int id in villagerIdsList)
                 {
@@ -235,7 +246,7 @@ namespace TaiwuCommunism
                     }
                     villager.ChangeResource(context, i, acquire);
                     distributor.ChangeResource(context, i, -acquire);
-                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}得到了{1}的资源{2}", villager.GetId(), acquire.ToString(), i.ToString())); }
+                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}得到了{1}的资源{2}", villager.GetId(), acquire, i)); }
                 }
             }
 
