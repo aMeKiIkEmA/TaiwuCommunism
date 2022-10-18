@@ -12,7 +12,7 @@ using GameData.Common;
 
 namespace TaiwuCommunism
 {
-    [PluginConfig("TaiwuCommunism", "AmekiKyou", "1.1")]
+    [PluginConfig("TaiwuCommunism", "AmekiKyou", "1.2")]
     public class TaiwuCommunism : TaiwuRemakePlugin
     {
         private Harmony harmony;
@@ -20,11 +20,6 @@ namespace TaiwuCommunism
         // Is resource redistribution allowed.
         // When true, villagers turns in resources at end of the month, and distributes equally.
         private static bool resourceRedistribution;
-
-        // TODO(ameki): implement purchase item logic
-        // Is end-month purchase allowed.
-        // When true, the village will try purchase material items in nearby villages.
-        private static bool purchaseRemainingCommodity;
 
         public override void OnModSettingUpdate()
         {
@@ -54,7 +49,26 @@ namespace TaiwuCommunism
             DomainManager.Mod.GetSetting(base.ModIdStr, "VillagerResourceLowerBoundMedicine", ref Resource.villagerResourceLowerBound[5]);
             DomainManager.Mod.GetSetting(base.ModIdStr, "VillagerResourceLowerBoundCash", ref Resource.villagerResourceLowerBound[6]);
 
-            DomainManager.Mod.GetSetting(base.ModIdStr, "PurchaseRemainingCommodity", ref TaiwuCommunism.purchaseRemainingCommodity);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "PurchaseRemainingCommodity", ref Resource.purchaseRemainingCommodity);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyFoodMaterial", ref Resource.buyFoodMaterial);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyWoodMaterial", ref Resource.buyWoodMaterial);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyOreMaterial", ref Resource.buyOreMaterial);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyJadeMaterial", ref Resource.buyJadeMaterial);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyFabricMaterial", ref Resource.buyFabricMaterial);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyMedicineMaterial", ref Resource.buyMedicineMaterial);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyCraftTool", ref Resource.buyCraftTool);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyMedicine", ref Resource.buyMedicine);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyPoison", ref Resource.buyPoison);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyWug", ref Resource.buyWug);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyTea", ref Resource.buyTea);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyWine", ref Resource.buyWine);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyLifeSkillBook", ref Resource.buyLifeSkillBook);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyRope", ref Resource.buyRope);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyBuildingCore", ref Resource.buyBuildingCore);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "ItemMaxGrade", ref Resource.itemMaxGrade);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "ItemMinGrade", ref Resource.itemMinGrade);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "UnlockAreaLimitation", ref Resource.unlockAreaLimitation);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyItemNotification", ref Resource.unlockAreaLimitation);
         }
 
         public override void Initialize() {
@@ -70,6 +84,7 @@ namespace TaiwuCommunism
                 Resource.Redistribute(context);
             } else if (Resource.sellOverflownResource)
             {
+                if (Resource.purchaseRemainingCommodity) { Resource.PurchaseNearbyMerchantCommodity(context); }
                 Resource.SellTaiwuOverflownResource(context);
             }
         }
