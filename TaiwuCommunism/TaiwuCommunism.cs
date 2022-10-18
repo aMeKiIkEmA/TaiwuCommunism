@@ -90,8 +90,9 @@ namespace TaiwuCommunism
             DomainManager.Mod.GetSetting(base.ModIdStr, "ItemMaxGrade", ref Resource.itemMaxGrade);
             DomainManager.Mod.GetSetting(base.ModIdStr, "ItemMinGrade", ref Resource.itemMinGrade);
             DomainManager.Mod.GetSetting(base.ModIdStr, "UnlockAreaLimitation", ref Resource.unlockAreaLimitation);
-            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyItemNotification", ref Resource.unlockAreaLimitation);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "BuyItemNotification", ref Resource.buyItemNotification);
             DomainManager.Mod.GetSetting(base.ModIdStr, "ReservedWarehouseHeadroom", ref Resource.reservedWarehouseHeadroom);
+            DomainManager.Mod.GetSetting(base.ModIdStr, "DebugInfo", ref Resource.debugInfo);
         }
 
         public override void Initialize() {

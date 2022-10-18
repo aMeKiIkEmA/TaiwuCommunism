@@ -82,6 +82,9 @@ namespace TaiwuCommunism
         // Precentage of reserved space in warehouse.
         public static int reservedWarehouseHeadroom;
 
+        // Write debug info or not.
+        public static bool debugInfo;
+
         // List of item subtypes.
         private const short FoodMaterial = 500;
         private const short WoodMaterial = 501;
@@ -141,7 +144,7 @@ namespace TaiwuCommunism
 
         public static void Redistribute(DataContext context)
         {
-            AdaptableLog.Info("开始重新分配");
+            if (debugInfo) { AdaptableLog.Info("开始重新分配"); }
             List<int> villagerIdsList = new List<int>();
             DomainManager.Organization.GetElement_CivilianSettlements(DomainManager.Taiwu.GetTaiwuVillageSettlementId()).GetMembers().GetAllMembers(villagerIdsList);
             GameData.Domains.Character.Character distributor;
@@ -161,7 +164,7 @@ namespace TaiwuCommunism
                 } while (!isDistributorFound && counter < 3);
                 if (!isDistributorFound)
                 {
-                    AdaptableLog.Warning("未找到分配主持人");
+                    if (debugInfo) AdaptableLog.Warning("未找到分配主持人");
                     return;
                 }
             }
@@ -170,7 +173,7 @@ namespace TaiwuCommunism
                 bool isTaiwuFound = DomainManager.Character.TryGetElement_Objects(distributorId, out distributor);
                 if (!isTaiwuFound)
                 {
-                    AdaptableLog.Warning("未找到太吾");
+                    if (debugInfo) AdaptableLog.Warning("未找到太吾");
                     return;
                 }
             }
@@ -189,17 +192,17 @@ namespace TaiwuCommunism
                 {
                     continue;
                 }
-                // AdaptableLog.Info(String.Format("村民{0}{1}上缴资源", villager.GetSurname(), villager.GetGivenName()));
+                if (debugInfo) AdaptableLog.Info(String.Format("村民{0}上缴资源", villager.GetId()));
                 actualVillagerCount++;
                 for (sbyte i = 0; i < resourceTypesCount; i++)
                 {
                     int resource = villager.GetResource(i);
-                    // AdaptableLog.Info(String.Format("村民{0}{1}拥有{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), resource.ToString(), i.ToString()));
-                    if ( resource < villagerResourceLowerBound[i] ) { continue; }
+                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}拥有{1}的资源{2}", villager.GetId(), resource.ToString(), i.ToString())); }
+                    if (resource < villagerResourceLowerBound[i]) { continue; }
                     int surplus = resource - villagerResourceLowerBound[i];
                     villager.ChangeResource(context, i, -surplus);
                     distributor.ChangeResource(context, i, surplus);
-                    // AdaptableLog.Info(String.Format("村民{0}上缴了{1}{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), surplus.ToString(), i.ToString()));
+                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}上缴了{1}的资源{2}", villager.GetId(), surplus.ToString(), i.ToString())); }
                 }
             }
 
@@ -232,7 +235,7 @@ namespace TaiwuCommunism
                     }
                     villager.ChangeResource(context, i, acquire);
                     distributor.ChangeResource(context, i, -acquire);
-                    // AdaptableLog.Info(String.Format("村民{0}{1}得到了{2}的资源{3}", villager.GetSurname(), villager.GetGivenName(), acquire.ToString(), i.ToString()));
+                    if (debugInfo) { AdaptableLog.Info(String.Format("村民{0}得到了{1}的资源{2}", villager.GetId(), acquire.ToString(), i.ToString())); }
                 }
             }
 
@@ -248,7 +251,7 @@ namespace TaiwuCommunism
 
         private static void PurchaseNearbyMerchantCommodity(DataContext context, int traderId)
         {
-            AdaptableLog.Info("开始进货");
+            if (debugInfo) { AdaptableLog.Info("开始进货"); }
             short taiwuVillageAreaId = DomainManager.Organization.GetElement_CivilianSettlements(DomainManager.Taiwu.GetTaiwuVillageSettlementId()).GetLocation().AreaId;
             List<GameData.Domains.Organization.Settlement> settlements = new List<GameData.Domains.Organization.Settlement>();
             DomainManager.Organization.GetAllCivilianSettlements(settlements);
@@ -261,13 +264,13 @@ namespace TaiwuCommunism
             int cash = trader.GetResource(6) - (traderId == DomainManager.Taiwu.GetTaiwuCharId() ? taiwuResourceLowerBound[6] : villagerResourceLowerBound[6]);
             if (DomainManager.Taiwu.GetWarehouseMaxLoad() * (100 - reservedWarehouseHeadroom) / 100 <= DomainManager.Taiwu.GetWarehouseCurrLoad()) { return; }
             if (cash <= 0) { return; }
-            // AdaptableLog.Info(String.Format("持有银钱{0}", cash));
+            if (debugInfo) { AdaptableLog.Info(String.Format("持有银钱{0}", cash)); }
             trader.ChangeResource(context, 6, -cash);
 
             foreach (GameData.Domains.Organization.Settlement settlement in settlements) {
-                // AdaptableLog.Info(String.Format("开始探查据点{0}, 位于区域{1}", settlement.GetId(), settlement.GetLocation().AreaId));
+                // if (debugInfo) { AdaptableLog.Info(String.Format("开始探查据点{0}, 位于区域{1}", settlement.GetId(), settlement.GetLocation().AreaId)); }
                 if (!unlockAreaLimitation && taiwuVillageAreaId != settlement.GetLocation().AreaId) {
-                    // AdaptableLog.Info("不在太吾村区域");
+                    // if (debugInfo) { AdaptableLog.Info("不在太吾村区域"); }
                     continue; 
                 }
                 List<int> civillianIdList = new List<int>();
@@ -280,22 +283,22 @@ namespace TaiwuCommunism
                     {
                         continue;
                     }
-                    // AdaptableLog.Info(String.Format("尝试和{0}开始贸易", civillian.GetId()));
                     GameData.Domains.Merchant.MerchantData merchantData;
                     if (!DomainManager.Merchant.TryGetMerchantData(id, out merchantData)) {
-                        // AdaptableLog.Info("不是商人");
+                        // if (debugInfo) { AdaptableLog.Info("不是商人"); }
                         continue;
                     }
                     sbyte merchantType;
                     if (!DomainManager.Extra.TryGetMerchantCharToType(id, out merchantType))
                     {
-                        // AdaptableLog.Info("商人种类无法获取");
+                        // if (debugInfo) { AdaptableLog.Info("商人种类无法获取"); }
                         continue;
                     }
-                    // AdaptableLog.Info(String.Format("商人种类{0}", merchantType));
+                    if (debugInfo) { AdaptableLog.Info(String.Format("尝试和{0}开始贸易", civillian.GetId())); }
+                    if (debugInfo) { AdaptableLog.Info(String.Format("商人种类{0}", merchantType)); }
                     if (!unlockAreaLimitation && civillian.GetLocation().AreaId != taiwuVillageAreaId)
                     {
-                        // AdaptableLog.Info("商人外出");
+                        if (debugInfo) { AdaptableLog.Info("商人外出"); }
                         continue;
                     }
                     // int merchantFavorability = DomainManager.Merchant.GetMerchantFavorability()[merchantType];
@@ -306,8 +309,9 @@ namespace TaiwuCommunism
                         Dictionary<ItemKey, int> items = merchantData.GetGoodsList(i).Items;
                         foreach(KeyValuePair<ItemKey, int> item in items) {
                             short itemSubtype = ItemTemplateHelper.GetItemSubType(item.Key.ItemType, item.Key.TemplateId);
-                            short itemGrade = ItemTemplateHelper.GetGrade(item.Key.ItemType, item.Key.TemplateId);
-                            // AdaptableLog.Info(String.Format("商人有{1}个{0}，品级为{2}。", ItemTemplateHelper.GetName(item.Key.ItemType, item.Key.TemplateId), item.Value, itemGrade));
+                            sbyte itemGrade = ItemTemplateHelper.GetGrade(item.Key.ItemType, item.Key.TemplateId);
+                            itemGrade = (sbyte)(9 - itemGrade);
+                            if (debugInfo) { AdaptableLog.Info(String.Format("商人有{1}个{0}，品级为{2}。", ItemTemplateHelper.GetName(item.Key.ItemType, item.Key.TemplateId), item.Value, itemGrade)); }
                             if (!isAllowedToPurchaseBySubtype(itemSubtype)) { continue; }
                             if (itemGrade < itemMaxGrade) { continue; }
                             if (itemGrade > itemMinGrade) { continue; }
@@ -330,15 +334,21 @@ namespace TaiwuCommunism
                             {
                                 maxCanBuy = Math.Min(maxCanBuy, cash / price);
                             }
+                            if (debugInfo) { AdaptableLog.Info(String.Format("仓库剩余空间{0}, 剩余银钱{1}, 价值{2}, 重量{3}, 最大可买入{4}", headroom, cash, price, weight, maxCanBuy)); }
                             if (maxCanBuy <= 0) { continue; }
 
-                            DomainManager.Taiwu.WarehouseAdd(context, key, maxCanBuy);
-                            DomainManager.Merchant.RemoveExistingMerchantItem(context, civillian.GetId(), key, maxCanBuy);
-                            DomainManager.Merchant.ChangeMerchantCumulativeMoney(context, merchantType, price * maxCanBuy);
-                            cash -= maxCanBuy * price;
+                            Random random = new Random();
+                            int buyCount = random.Next(0, maxCanBuy + 1);
+                            if (debugInfo) { AdaptableLog.Info(String.Format("买入{0}个{1}", buyCount, ItemTemplateHelper.GetName(key.ItemType, key.TemplateId))); }
+                            if (buyCount <= 0) { continue; }
+
+                            DomainManager.Taiwu.WarehouseAdd(context, key, buyCount);
+                            DomainManager.Merchant.RemoveExistingMerchantItem(context, civillian.GetId(), key, buyCount);
+                            DomainManager.Merchant.ChangeMerchantCumulativeMoney(context, merchantType, price * buyCount);
+                            cash -= buyCount * price;
 
                             if (buyItemNotification) {
-                                for (int j = 0; j < maxCanBuy; ++j) {
+                                for (int j = 0; j < buyCount; ++j) {
                                     DomainManager.World.GetInstantNotificationCollection().AddResourceDecreased(DomainManager.Taiwu.GetTaiwuCharId(), 6, price);
                                     DomainManager.World.GetInstantNotificationCollection().AddGetItem(DomainManager.Taiwu.GetTaiwuCharId(), key.ItemType, key.TemplateId);
                                 }
@@ -352,7 +362,7 @@ namespace TaiwuCommunism
 
         public static void SellTaiwuOverflownResource(DataContext context)
         {
-            AdaptableLog.Info("开始溢出资源处理");
+            if (debugInfo) { AdaptableLog.Info("开始溢出资源处理"); }
             GameData.Domains.Character.Character taiwu;
             bool exists = DomainManager.Character.TryGetElement_Objects(DomainManager.Taiwu.GetTaiwuCharId(), out taiwu);
             if (!exists)
@@ -373,18 +383,18 @@ namespace TaiwuCommunism
                     int renownGained = maybeGiveAwaySurplus * exchangeRateRenown / 10;
                     totalRenownGained += renownGained;
                     taiwu.ChangeResource(context, 7, renownGained);
-                    // AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}声望", maybeGiveAwaySurplus, i, renownGained));
+                    if (debugInfo) { AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}声望", maybeGiveAwaySurplus, i, renownGained)); }
                 }
                 else {
                     int cashGained = maybeGiveAwaySurplus * exchangeRateCash / 10;
                     totalCashEarned += cashGained;
                     taiwu.ChangeResource(context, 6, cashGained);
-                    // AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", maybeGiveAwaySurplus, i, cashGained));
+                    if (debugInfo) { AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", maybeGiveAwaySurplus, i, cashGained)); }
                 }
                 int cashEarned = surplus * exchangeRateCash / 10;
                 totalCashEarned += cashEarned;
                 taiwu.ChangeResource(context, 6, cashEarned);
-                // AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", surplus, i, cashEarned));
+                if (debugInfo) { AdaptableLog.Info(String.Format("太吾出售{0}资源{1}换取{2}银钱", surplus, i, cashEarned)); }
             }
             if (sellOverflowNotification) {
                 DomainManager.World.GetInstantNotificationCollection().AddResourceIncreased(DomainManager.Taiwu.GetTaiwuCharId(), 6, totalCashEarned);
